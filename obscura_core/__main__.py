@@ -10,9 +10,9 @@ from pathlib import Path
 import uvicorn
 from loguru import logger
 
-from obscura_daemon.core.daemon import ObscuraDaemon
-from obscura_daemon.core.models import DaemonConfig
-from obscura_daemon.core.server import create_app
+from obscura_core.core.daemon import ObscuraDaemon
+from obscura_core.core.models import DaemonConfig
+from obscura_core.core.server import create_app
 
 
 def main() -> None:

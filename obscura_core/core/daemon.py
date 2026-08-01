@@ -11,16 +11,16 @@ from pathlib import Path
 from fastapi import FastAPI
 from loguru import logger
 
-from obscura_daemon.core.models import (
+from obscura_core.core.models import (
     BrowserHandle,
     BrowserRequirements,
     DaemonConfig,
     HookType,
     PluginStatus,
 )
-from obscura_daemon.hooks.hook_system import HookSystem
-from obscura_daemon.pool.connection_pool import ConnectionPoolManager
-from obscura_daemon.sync.cookie_sync import CookieSyncManager
+from obscura_core.hooks.hook_system import HookSystem
+from obscura_core.pool.connection_pool import ConnectionPoolManager
+from obscura_core.sync.cookie_sync import CookieSyncManager
 
 
 class ObscuraDaemon:

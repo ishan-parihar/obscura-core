@@ -9,8 +9,8 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from loguru import logger
 
-from obscura_daemon.core.daemon import ObscuraDaemon
-from obscura_daemon.core.models import (
+from obscura_core.core.daemon import ObscuraDaemon
+from obscura_core.core.models import (
     BrowserHandle,
     BrowserRequirements,
     DaemonConfig,

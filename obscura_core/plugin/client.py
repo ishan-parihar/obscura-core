@@ -9,7 +9,7 @@ from typing import Self
 import httpx
 from loguru import logger
 
-from obscura_daemon.core.models import (
+from obscura_core.core.models import (
     BrowserHandle,
     BrowserRequirements,
     HookType,

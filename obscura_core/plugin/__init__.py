@@ -1,5 +1,5 @@
 """Plugin client components."""
 
-from obscura_daemon.plugin.client import ObscuraPlugin
+from obscura_core.plugin.client import ObscuraPlugin
 
 __all__ = ["ObscuraPlugin"]

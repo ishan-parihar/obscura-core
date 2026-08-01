@@ -1,7 +1,7 @@
 """Core daemon components."""
 
-from obscura_daemon.core.daemon import ObscuraDaemon, daemon_context
-from obscura_daemon.core.models import (
+from obscura_core.core.daemon import ObscuraDaemon, daemon_context
+from obscura_core.core.models import (
     BrowserHandle,
     BrowserRequirements,
     DaemonConfig,
@@ -13,7 +13,7 @@ from obscura_daemon.core.models import (
     SyncState,
     SyncStatus,
 )
-from obscura_daemon.core.server import create_app
+from obscura_core.core.server import create_app
 
 __all__ = [
     "ObscuraDaemon",

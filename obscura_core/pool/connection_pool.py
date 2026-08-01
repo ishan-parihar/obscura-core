@@ -10,7 +10,7 @@ from typing import Self
 
 from loguru import logger
 
-from obscura_daemon.core.models import (
+from obscura_core.core.models import (
     BrowserHandle,
     BrowserRequirements,
     DaemonConfig,

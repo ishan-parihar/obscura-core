@@ -1,55 +1,94 @@
-# Obscura Daemon
+# Obscura Core
 
-Centralized daemon for Obscura browser integration with cookie sync, connection pooling, and plugin system.
+Core library for Obscura browser integration with cookie management, daemon service, connection pooling, and plugin system.
 
 ## Overview
 
-Obscura Daemon provides a unified service for managing browser automation and cookie synchronization across multiple CLI tools (linkedin-lyr, instagram-lyr, reddit-lyr, twitter-lyr).
+Obscura Core provides a unified library for managing browser automation, cookie synchronization, and daemon services across multiple CLI tools (linkedin-lyr, instagram-lyr, reddit-lyr, twitter-lyr).
 
 ## Features
 
+### Cookie Management
+- **Automatic Cookie Validation**: Periodically validates cookies against platform APIs
+- **Browser Cookie Extraction**: Automatically extracts cookies from browsers (Chrome, Firefox, Brave, Arc, etc.)
+- **Multi-Source Storage**: Supports file storage, environment variables, and browser profiles
+- **Auth Invalidation**: Triggers re-login flows when cookies are persistently invalid
+- **Platform-Specific Extractors**: Pre-configured extractors for Reddit, Twitter/X, Instagram, LinkedIn
+
+### Daemon Service
 - **Cookie Synchronization**: Automatically syncs cookies from tool-specific locations to a centralized cache
 - **Connection Pooling**: Manages browser connection pools with dynamic port allocation
 - **Hook System**: Extensible hook system for custom behavior
 - **Runtime Detection**: Shared runtime detection for consistent profile management
 - **HTTP API**: REST API for tool integration
 
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Obscura Daemon                           │
-├─────────────────────────────────────────────────────────────┤
-│  Cookie Sync Layer  │  Connection Pool  │  Hook System      │
-└─────────────────────────────────────────────────────────────┘
-                            ↓
-┌──────────────┬──────────────┬──────────────┬──────────────┐
-│ LinkedIn CLI │ Instagram    │ Reddit HTTPX │ Twitter CLI  │
-└──────────────┴──────────────┴──────────────┴──────────────┘
-```
-
 ## Installation
 
 ```bash
-cd obscura-daemon
-uv sync
+pip install obscura-core
+```
+
+Or with uv:
+
+```bash
+uv add obscura-core
 ```
 
 ## Usage
 
-### Start the daemon
+### Cookie Manager Only
+
+```python
+import asyncio
+from obscura_core import (
+    ObscuraCookieManager,
+    FileCookieStorage,
+    TwitterCookieExtractor,
+    CookieSource,
+)
+
+async def main():
+    # Define your cookie validator
+    def validator(cookies: dict[str, str]) -> bool:
+        return "auth_token" in cookies
+
+    # Create manager
+    storage = FileCookieStorage("/path/to/cookies.json")
+    extractor = TwitterCookieExtractor()
+
+    manager = ObscuraCookieManager(
+        storage=storage,
+        extractor=extractor,
+        validator=validator,
+        required_cookies=["auth_token", "ct0"],
+        validation_interval=300,  # 5 minutes
+    )
+
+    # Get valid cookies
+    result = await manager.get_cookies()
+
+    if result.valid:
+        print(f"Valid cookies from {result.source}")
+        print(f"Cookies: {result.cookies}")
+    else:
+        print(f"Invalid cookies: {result.error}")
+
+asyncio.run(main())
+```
+
+### Daemon Service
 
 ```bash
-uv run obscura-daemon
+# Start the daemon
+obscura-daemon
 ```
 
 The daemon will start on `http://127.0.0.1:9999` by default.
 
-### Using the plugin client
+### Using the Plugin Client
 
 ```python
-from obscura_daemon.plugin.client import ObscuraPlugin
-from obscura_daemon.core.models import BrowserRequirements
+from obscura_core import ObscuraPlugin, BrowserRequirements
 
 async with ObscuraPlugin() as plugin:
     # Get cookies
@@ -68,10 +107,26 @@ async with ObscuraPlugin() as plugin:
 
 ## Configuration
 
-Configuration is managed via `DaemonConfig` class:
+### Cookie Manager Configuration
 
 ```python
-from obscura_daemon.core.models import DaemonConfig
+from obscura_core import ObscuraCookieManager
+
+manager = ObscuraCookieManager(
+    storage=storage,
+    extractor=extractor,
+    validator=validator,
+    required_cookies=["sessionid"],
+    validation_interval=600,  # 10 minutes
+    max_re_extraction_attempts=3,
+    re_extraction_cooldown=60,  # seconds
+)
+```
+
+### Daemon Configuration
+
+```python
+from obscura_core import DaemonConfig
 
 config = DaemonConfig(
     host="127.0.0.1",
@@ -117,6 +172,13 @@ config = DaemonConfig(
 ## Development
 
 ```bash
+# Clone repository
+git clone https://github.com/ishan-parihar/obscura-core.git
+cd obscura-core
+
+# Install in development mode
+uv sync
+
 # Install dev dependencies
 uv sync --extra dev
 
@@ -124,7 +186,7 @@ uv sync --extra dev
 uv run ruff check .
 
 # Run type checking
-uv run ty check
+uv run mypy .
 
 # Run tests
 uv run pytest

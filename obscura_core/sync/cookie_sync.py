@@ -12,7 +12,7 @@ from typing import Self
 from loguru import logger
 from watchfiles import awatch
 
-from obscura_daemon.core.models import (
+from obscura_core.core.models import (
     DaemonConfig,
     SyncDirection,
     SyncResult,

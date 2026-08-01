@@ -1,7 +1,7 @@
 [project]
-name = "obscura-daemon"
+name = "obscura-core"
 version = "0.1.0"
-description = "Centralized daemon for Obscura browser integration with cookie sync, connection pooling, and plugin system"
+description = "Core library for Obscura browser integration with cookie management, daemon service, connection pooling, and plugin system"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -12,7 +12,14 @@ dependencies = [
     "loguru>=0.7.0",
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.32.0",
+    "browser-cookie3>=0.10.0",
+    "cryptography>=42.0.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/ishan-parihar/obscura-core"
+Repository = "https://github.com/ishan-parihar/obscura-core"
+Issues = "https://github.com/ishan-parihar/obscura-core/issues"
 
 [project.optional-dependencies]
 dev = [
@@ -24,7 +31,7 @@ dev = [
 ]
 
 [project.scripts]
-obscura-daemon = "obscura_daemon.__main__:main"
+obscura-daemon = "obscura_core.__main__:main"
 
 [build-system]
 requires = ["hatchling"]

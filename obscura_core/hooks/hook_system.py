@@ -9,7 +9,7 @@ from typing import Callable
 
 from loguru import logger
 
-from obscura_daemon.core.models import Hook, HookType
+from obscura_core.core.models import Hook, HookType
 
 
 class HookSystem:
