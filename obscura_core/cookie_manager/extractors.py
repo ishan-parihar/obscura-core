@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from obscura_core.cookie_managerbrowser_extraction import BrowserExtractorFactory
+from obscura_core.cookie_manager.browser_extraction import BrowserExtractorFactory
 
 
 class BrowserCookieExtractor:

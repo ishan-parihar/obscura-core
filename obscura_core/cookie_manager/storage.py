@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional
 
-from obscura_core.cookie_managerexceptions import CookieStorageError
+from obscura_core.cookie_manager.exceptions import CookieStorageError
 
 
 class CookieStorage(ABC):

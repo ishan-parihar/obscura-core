@@ -10,28 +10,28 @@ Provides:
 
 from __future__ import annotations
 
-from obscura_core.cookie_manager.core import ObscuraCookieManager, CookieSource, CookieValidationResult
-from obscura_core.cookie_manager.storage import (
+from obscura_core.cookie_manager..core import ObscuraCookieManager, CookieSource, CookieValidationResult
+from obscura_core.cookie_manager..storage import (
     CookieStorage,
     FileCookieStorage,
     EnvVarCookieStorage,
     BrowserProfileStorage,
     MultiSourceCookieStorage,
 )
-from obscura_core.cookie_manager.browser_extraction import (
+from obscura_core.cookie_manager..browser_extraction import (
     BrowserExtractor,
     BrowserCookie3Extractor,
     SubprocessBrowserExtractor,
     ChromiumCookieExtractor,
 )
-from obscura_core.cookie_manager.extractors import (
+from obscura_core.cookie_manager..extractors import (
     BrowserCookieExtractor,
     RedditCookieExtractor,
     TwitterCookieExtractor,
     InstagramCookieExtractor,
     LinkedInCookieExtractor,
 )
-from obscura_core.cookie_manager.exceptions import (
+from obscura_core.cookie_manager..exceptions import (
     ObscuraError,
     CookieStorageError,
     BrowserExtractionError,

@@ -11,9 +11,9 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Callable, Optional
 
-from obscura_core.cookie_managerstorage import CookieStorage
-from obscura_core.cookie_managerextractors import BrowserCookieExtractor
-from obscura_core.cookie_managerexceptions import CookieValidationError, AuthInvalidatedError, ReLoginRequiredError
+from obscura_core.cookie_manager.storage import CookieStorage
+from obscura_core.cookie_manager.extractors import BrowserCookieExtractor
+from obscura_core.cookie_manager.exceptions import CookieValidationError, AuthInvalidatedError, ReLoginRequiredError
 
 logger = logging.getLogger(__name__)
 

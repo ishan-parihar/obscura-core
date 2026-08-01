@@ -17,7 +17,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional
 
-from obscura_core.cookie_managerexceptions import BrowserExtractionError
+from obscura_core.cookie_manager.exceptions import BrowserExtractionError
 
 logger = logging.getLogger(__name__)
 
