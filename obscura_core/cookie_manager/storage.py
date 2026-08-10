@@ -132,7 +132,16 @@ class BrowserProfileStorage(CookieStorage):
         try:
             data = json.loads(self.cookies_file.read_text())
             if isinstance(data, dict):
-                return data.get("cookies", data)
+                cookies = data.get("cookies", data)
+                # Profile format stores cookies as a list of {name, value, ...}
+                if isinstance(cookies, list):
+                    return {
+                        c["name"]: c["value"]
+                        for c in cookies
+                        if isinstance(c, dict) and "name" in c and "value" in c
+                    }
+                if isinstance(cookies, dict):
+                    return cookies
             return None
         except (json.JSONDecodeError, OSError) as e:
             raise CookieStorageError(f"Failed to load cookies from {self.cookies_file}: {e}")

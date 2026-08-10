@@ -3,6 +3,7 @@
 <!-- T2I HERO SPEC — Subject: a browser-control core — a central daemon (obscura) managing cookie vaults, connection pools, and plugin hooks, feeding four satellite tool-avatars (LinkedIn, Instagram, Reddit, X/Twitter); a vault-of-cookies motif with synchronized sync arrows. Composition: hub-and-spoke, cookie vault as the foundation. Palette: midnight #0f172a → browser ember #f97316 → sync cyan #22d3ee → platform accents. Style: dark flat vector infrastructure, glowing sync arcs, no text. 16:9. -->
 
 ![Python](https://img.shields.io/badge/Python-3.11+-2b6cb0?logo=python&logoColor=white)
+[![CI](https://github.com/ishan-parihar/obscura-core/actions/workflows/ci.yml/badge.svg)](https://github.com/ishan-parihar/obscura-core/actions/workflows/ci.yml)
 ![uv](https://img.shields.io/badge/uv-0.6+-7c3aed?logo=astral&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-059669)
 ![MCP](https://img.shields.io/badge/MCP-Server-c026d3?logo=modelcontextprotocol)
