@@ -13,6 +13,28 @@ from typing import Optional
 from obscura_core.cookie_manager.exceptions import CookieStorageError
 
 
+def _normalise_cookies(data) -> Optional[dict[str, str]]:
+    """Convert a parsed JSON blob into a {name: value} cookie dict.
+
+    Accepts `{cookies: {name: value}}`, `{cookies: [{name, value, ...}]}`,
+    flat `{name: value}` dicts, and raw lists of `{name, value}` objects.
+    Returns None when the shape is unrecognized.
+    """
+    if isinstance(data, dict):
+        cookies = data.get("cookies", data)
+    else:
+        cookies = data
+    if isinstance(cookies, dict):
+        return {k: v for k, v in cookies.items() if k and v}
+    if isinstance(cookies, list):
+        return {
+            c["name"]: c["value"]
+            for c in cookies
+            if isinstance(c, dict) and "name" in c and "value" in c
+        }
+    return None
+
+
 class CookieStorage(ABC):
     """Abstract base class for cookie storage."""
     
@@ -48,11 +70,7 @@ class FileCookieStorage(CookieStorage):
         if not self.file_path.exists():
             return None
         try:
-            data = json.loads(self.file_path.read_text())
-            # Support both {"cookies": {...}} and {...} formats
-            if isinstance(data, dict):
-                return data.get("cookies", data)
-            return None
+            return _normalise_cookies(json.loads(self.file_path.read_text()))
         except (json.JSONDecodeError, OSError) as e:
             raise CookieStorageError(f"Failed to load cookies from {self.file_path}: {e}")
     
@@ -78,14 +96,9 @@ class FileCookieStorage(CookieStorage):
         if not raw:
             return None
         try:
-            data = json.loads(raw)
-            if isinstance(data, dict):
-                return {k: v for k, v in data.items() if k and v}
-            elif isinstance(data, list):
-                return {c["name"]: c["value"] for c in data if "name" in c and "value" in c}
+            return _normalise_cookies(json.loads(raw))
         except json.JSONDecodeError:
-            pass
-        return None
+            return None
 
 
 class EnvVarCookieStorage(CookieStorage):
@@ -99,14 +112,9 @@ class EnvVarCookieStorage(CookieStorage):
         if not raw:
             return None
         try:
-            data = json.loads(raw)
-            if isinstance(data, dict):
-                return {k: v for k, v in data.items() if k and v}
-            elif isinstance(data, list):
-                return {c["name"]: c["value"] for c in data if "name" in c and "value" in c}
+            return _normalise_cookies(json.loads(raw))
         except json.JSONDecodeError:
-            pass
-        return None
+            return None
     
     async def save(self, cookies: dict[str, str]) -> None:
         # Can't actually save to env var in current process
@@ -130,19 +138,7 @@ class BrowserProfileStorage(CookieStorage):
         if not self.cookies_file.exists():
             return None
         try:
-            data = json.loads(self.cookies_file.read_text())
-            if isinstance(data, dict):
-                cookies = data.get("cookies", data)
-                # Profile format stores cookies as a list of {name, value, ...}
-                if isinstance(cookies, list):
-                    return {
-                        c["name"]: c["value"]
-                        for c in cookies
-                        if isinstance(c, dict) and "name" in c and "value" in c
-                    }
-                if isinstance(cookies, dict):
-                    return cookies
-            return None
+            return _normalise_cookies(json.loads(self.cookies_file.read_text()))
         except (json.JSONDecodeError, OSError) as e:
             raise CookieStorageError(f"Failed to load cookies from {self.cookies_file}: {e}")
     

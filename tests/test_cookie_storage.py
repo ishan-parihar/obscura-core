@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from obscura_core.cookie_manager.exceptions import CookieStorageError
+from obscura_core.cookie_manager.exceptions import CookieStorageError, ObscuraError
 from obscura_core.cookie_manager.storage import (
     BrowserProfileStorage,
     EnvVarCookieStorage,
@@ -129,8 +129,27 @@ async def test_browser_profile_storage_roundtrip(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
-async def test_exception_hierarchy() -> None:
-    """All storage errors derive from ObscuraError."""
-    from obscura_core.cookie_manager.exceptions import ObscuraError
+async def test_browser_profile_load_flat_dict(tmp_path: Path) -> None:
+    """BrowserProfileStorage.load() accepts a flat {name: value} file."""
+    profile = tmp_path / "profile"
+    profile.mkdir()
+    (profile / "cookies.json").write_text(json.dumps({"a": "1"}))
+    store = BrowserProfileStorage(profile)
+    assert await store.load() == {"a": "1"}
 
+
+@pytest.mark.asyncio
+async def test_profile_list_filters_incomplete_entries(tmp_path: Path) -> None:
+    """Entries missing name or value are filtered out of the parsed dict."""
+    profile = tmp_path / "profile"
+    profile.mkdir()
+    (profile / "cookies.json").write_text(
+        json.dumps({"cookies": [{"name": "ok", "value": "1"}, {"name": "no-value"}]})
+    )
+    store = BrowserProfileStorage(profile)
+    assert await store.load() == {"ok": "1"}
+
+
+def test_exception_hierarchy() -> None:
+    """All storage errors derive from ObscuraError."""
     assert issubclass(CookieStorageError, ObscuraError)
