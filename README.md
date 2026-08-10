@@ -1,6 +1,27 @@
 # Obscura Core
 
-Core library for Obscura browser integration with cookie management, daemon service, connection pooling, and plugin system.
+<!-- T2I HERO SPEC — Subject: a browser-control core — a central daemon (obscura) managing cookie vaults, connection pools, and plugin hooks, feeding four satellite tool-avatars (LinkedIn, Instagram, Reddit, X/Twitter); a vault-of-cookies motif with synchronized sync arrows. Composition: hub-and-spoke, cookie vault as the foundation. Palette: midnight #0f172a → browser ember #f97316 → sync cyan #22d3ee → platform accents. Style: dark flat vector infrastructure, glowing sync arcs, no text. 16:9. -->
+
+![Python](https://img.shields.io/badge/Python-3.11+-2b6cb0?logo=python&logoColor=white)
+![uv](https://img.shields.io/badge/uv-0.6+-7c3aed?logo=astral&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-059669)
+![MCP](https://img.shields.io/badge/MCP-Server-c026d3?logo=modelcontextprotocol)
+![Status](https://img.shields.io/badge/Status-Active-brightgreen)
+
+Core library for Obscura browser integration with cookie management, daemon service, connection pooling, and plugin system — the shared engine behind **linkedin-lyr, instagram-lyr, reddit-lyr, twitter-lyr** and every other lyr-family CLI.
+
+## How it compares
+
+| Capability | **Obscura Core** | Playwright / undetected-chromedriver | Per-tool cookie hacks | Browser profile managers |
+|---|---|---|---|---|
+| **Shared cookie vault** | ✅ validated + auto-refreshed across all lyr tools | ❌ | ❌ (each tool re-implements) | ⚠️ |
+| **Auto cookie extraction** | ✅ from Chrome/Firefox/Brave/Arc + platform-specific extractors | ❌ | ⚠️ manual | ⚠️ |
+| **Connection pooling** | ✅ dynamic ports, shared pool | ❌ per-instance | ❌ | ❌ |
+| **Auth invalidation hooks** | ✅ triggers re-login flow on persistent invalidation | ❌ | ⚠️ | ❌ |
+| **Plugin/hook system** | ✅ extensible | ⚠️ | ❌ | ❌ |
+| **One engine, many tools** | ✅ single daemon powers 4+ CLIs | ❌ | ❌ | ❌ |
+
+One cookie-invalidation fix lands everywhere at once — that is the point of a shared core.
 
 ## Overview
 
