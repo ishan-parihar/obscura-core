@@ -3,6 +3,7 @@
 <!-- T2I HERO SPEC — Subject: a browser-control core — a central daemon (obscura) managing cookie vaults, connection pools, and plugin hooks, feeding four satellite tool-avatars (LinkedIn, Instagram, Reddit, X/Twitter); a vault-of-cookies motif with synchronized sync arrows. Composition: hub-and-spoke, cookie vault as the foundation. Palette: midnight #0f172a → browser ember #f97316 → sync cyan #22d3ee → platform accents. Style: dark flat vector infrastructure, glowing sync arcs, no text. 16:9. -->
 
 ![Python](https://img.shields.io/badge/Python-3.11+-2b6cb0?logo=python&logoColor=white)
+![LOC](https://img.shields.io/badge/LOC-2.9K-informational?style=flat-square)
 [![CI](https://github.com/ishan-parihar/obscura-core/actions/workflows/ci.yml/badge.svg)](https://github.com/ishan-parihar/obscura-core/actions/workflows/ci.yml)
 ![uv](https://img.shields.io/badge/uv-0.6+-7c3aed?logo=astral&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-059669)
@@ -217,3 +218,14 @@ uv run pytest
 ## License
 
 MIT
+
+---
+
+## ☕ Support & Sponsorship
+
+If you find this project useful, consider supporting ongoing development:
+
+[![Sponsor](https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-ea4aaa?style=flat-square&logo=github)](https://github.com/sponsors/ishan-parihar)
+[![Donate](https://img.shields.io/badge/Donate-Razorpay-3395FF?style=flat-square)](https://rzp.io/rzp/ishan-parihar)
+
+Your support funds new features, releases, and infrastructure for the whole ecosystem.
