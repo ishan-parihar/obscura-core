@@ -7,7 +7,6 @@ import hashlib
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Self
 
 from loguru import logger
 from watchfiles import awatch
@@ -152,7 +151,22 @@ class CookieSyncManager:
 
         # Perform sync
         try:
-            cache_path.write_text(source_content)
+            # Accept both jar formats: {"cookies": {...}} wrappers AND bare
+            # playwright-array lists ([{name, value, ...}, ...]). The old code
+            # called .get("cookies", ...) on lists -> AttributeError
+            # "'list' object has no attribute 'get'" on EVERY linkedin change
+            # (observed 2026-08-26, journal obscura-daemon).
+            parsed = json.loads(source_content)
+            if isinstance(parsed, dict) and "cookies" in parsed:
+                payload = parsed["cookies"]
+            else:
+                payload = parsed
+            # Filter non-string values (e.g., nested _all_cookies) and ensure cookie_string
+            if isinstance(payload, dict):
+                payload = {k: v for k, v in payload.items() if isinstance(v, str) and k and v}
+                if payload and "cookie_string" not in payload:
+                    payload["cookie_string"] = "; ".join(f"{k}={v}" for k, v in payload.items())
+            cache_path.write_text(json.dumps(payload))
             cache_hash = source_hash
             cache_modified = datetime.now().isoformat()
 
@@ -229,6 +243,15 @@ class CookieSyncManager:
 
         try:
             data = json.loads(cache_path.read_text())
+            # Unwrap {"cookies": {...}} format from source files
+            if isinstance(data, dict) and "cookies" in data and isinstance(data["cookies"], dict):
+                data = data["cookies"]
+            # Filter out non-string values (e.g., nested _all_cookies dict from twitter-lyr)
+            # which would break FastAPI dict[str,str] validation and cause 500
+            if isinstance(data, dict):
+                data = {k: v for k, v in data.items() if isinstance(v, str)}
+                if data and "cookie_string" not in data:
+                    data["cookie_string"] = "; ".join(f"{k}={v}" for k, v in data.items())
             return data
         except Exception as e:
             logger.error(f"Error reading cached cookies for {platform}: {e}")

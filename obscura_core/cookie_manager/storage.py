@@ -8,12 +8,11 @@ import json
 import os
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Optional
 
 from obscura_core.cookie_manager.exceptions import CookieStorageError
 
 
-def _normalise_cookies(data) -> Optional[dict[str, str]]:
+def _normalise_cookies(data) -> dict[str, str] | None:
     """Convert a parsed JSON blob into a {name: value} cookie dict.
 
     Accepts `{cookies: {name: value}}`, `{cookies: [{name, value, ...}]}`,
@@ -25,55 +24,61 @@ def _normalise_cookies(data) -> Optional[dict[str, str]]:
     else:
         cookies = data
     if isinstance(cookies, dict):
-        return {k: v for k, v in cookies.items() if k and v}
+        filtered = {k: v for k, v in cookies.items() if isinstance(v, str) and k and v}
+        if filtered and "cookie_string" not in filtered:
+            filtered["cookie_string"] = "; ".join(f"{k}={v}" for k, v in filtered.items())
+        return filtered
     if isinstance(cookies, list):
-        return {
+        result = {
             c["name"]: c["value"]
             for c in cookies
             if isinstance(c, dict) and "name" in c and "value" in c
         }
+        if result and "cookie_string" not in result:
+            result["cookie_string"] = "; ".join(f"{k}={v}" for k, v in result.items())
+        return result
     return None
 
 
 class CookieStorage(ABC):
     """Abstract base class for cookie storage."""
-    
+
     @abstractmethod
-    async def load(self) -> Optional[dict[str, str]]:
+    async def load(self) -> dict[str, str] | None:
         """Load cookies from storage."""
         pass
-    
+
     @abstractmethod
     async def save(self, cookies: dict[str, str]) -> None:
         """Save cookies to storage."""
         pass
-    
+
     @abstractmethod
     async def clear(self) -> None:
         """Clear stored cookies."""
         pass
-    
-    async def load_from_env(self) -> Optional[dict[str, str]]:
+
+    async def load_from_env(self) -> dict[str, str] | None:
         """Load cookies from environment variable (optional)."""
         return None
 
 
 class FileCookieStorage(CookieStorage):
     """Store cookies in a JSON file."""
-    
-    def __init__(self, file_path: Path, env_var: Optional[str] = None):
+
+    def __init__(self, file_path: Path, env_var: str | None = None):
         self.file_path = file_path
         self.env_var = env_var
         self.file_path.parent.mkdir(parents=True, exist_ok=True)
-    
-    async def load(self) -> Optional[dict[str, str]]:
+
+    async def load(self) -> dict[str, str] | None:
         if not self.file_path.exists():
             return None
         try:
             return _normalise_cookies(json.loads(self.file_path.read_text()))
         except (json.JSONDecodeError, OSError) as e:
             raise CookieStorageError(f"Failed to load cookies from {self.file_path}: {e}")
-    
+
     async def save(self, cookies: dict[str, str]) -> None:
         try:
             data = {"cookies": cookies}
@@ -81,15 +86,15 @@ class FileCookieStorage(CookieStorage):
             self.file_path.chmod(0o600)
         except OSError as e:
             raise CookieStorageError(f"Failed to save cookies to {self.file_path}: {e}")
-    
+
     async def clear(self) -> None:
         if self.file_path.exists():
             try:
                 self.file_path.unlink()
             except OSError as e:
                 raise CookieStorageError(f"Failed to clear cookies: {e}")
-    
-    async def load_from_env(self) -> Optional[dict[str, str]]:
+
+    async def load_from_env(self) -> dict[str, str] | None:
         if not self.env_var:
             return None
         raw = os.environ.get(self.env_var)
@@ -103,11 +108,11 @@ class FileCookieStorage(CookieStorage):
 
 class EnvVarCookieStorage(CookieStorage):
     """Store cookies in environment variable (for headless environments)."""
-    
+
     def __init__(self, env_var: str):
         self.env_var = env_var
-    
-    async def load(self) -> Optional[dict[str, str]]:
+
+    async def load(self) -> dict[str, str] | None:
         raw = os.environ.get(self.env_var)
         if not raw:
             return None
@@ -115,33 +120,33 @@ class EnvVarCookieStorage(CookieStorage):
             return _normalise_cookies(json.loads(raw))
         except json.JSONDecodeError:
             return None
-    
+
     async def save(self, cookies: dict[str, str]) -> None:
         # Can't actually save to env var in current process
         # This is mainly for loading
         pass
-    
+
     async def clear(self) -> None:
         pass
 
 
 class BrowserProfileStorage(CookieStorage):
     """Store cookies in a browser profile directory (for persistent browser sessions)."""
-    
+
     def __init__(self, profile_dir: Path):
         self.profile_dir = profile_dir
         self.cookies_file = profile_dir / "cookies.json"
         self.state_file = profile_dir / "source-state.json"
         self.profile_dir.mkdir(parents=True, exist_ok=True)
-    
-    async def load(self) -> Optional[dict[str, str]]:
+
+    async def load(self) -> dict[str, str] | None:
         if not self.cookies_file.exists():
             return None
         try:
             return _normalise_cookies(json.loads(self.cookies_file.read_text()))
         except (json.JSONDecodeError, OSError) as e:
             raise CookieStorageError(f"Failed to load cookies from {self.cookies_file}: {e}")
-    
+
     async def save(self, cookies: dict[str, str]) -> None:
         try:
             data = {
@@ -162,7 +167,7 @@ class BrowserProfileStorage(CookieStorage):
             self.cookies_file.chmod(0o600)
         except OSError as e:
             raise CookieStorageError(f"Failed to save cookies to {self.cookies_file}: {e}")
-    
+
     async def clear(self) -> None:
         for f in [self.cookies_file, self.state_file]:
             if f.exists():
@@ -170,27 +175,27 @@ class BrowserProfileStorage(CookieStorage):
                     f.unlink()
                 except OSError:
                     pass
-    
+
     def get_state_path(self) -> Path:
         return self.state_file
-    
+
     def profile_exists(self) -> bool:
         return self.profile_dir.exists()
 
 
 class MultiSourceCookieStorage(CookieStorage):
     """Try multiple storage sources in priority order."""
-    
+
     def __init__(self, sources: list[CookieStorage]):
         self.sources = sources
-    
-    async def load(self) -> Optional[dict[str, str]]:
+
+    async def load(self) -> dict[str, str] | None:
         for source in self.sources:
             cookies = await source.load()
             if cookies:
                 return cookies
         return None
-    
+
     async def save(self, cookies: dict[str, str]) -> None:
         # Save to all sources
         for source in self.sources:
@@ -198,15 +203,15 @@ class MultiSourceCookieStorage(CookieStorage):
                 await source.save(cookies)
             except Exception:
                 pass  # Best effort
-    
+
     async def clear(self) -> None:
         for source in self.sources:
             try:
                 await source.clear()
             except Exception:
                 pass
-    
-    async def load_from_env(self) -> Optional[dict[str, str]]:
+
+    async def load_from_env(self) -> dict[str, str] | None:
         for source in self.sources:
             cookies = await source.load_from_env()
             if cookies:

@@ -3,17 +3,15 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
-from typing import Annotated
 
 from fastapi import FastAPI
-from pydantic import BaseModel
 from loguru import logger
+from pydantic import BaseModel
 
 from obscura_core.core.daemon import ObscuraDaemon
 from obscura_core.core.models import (
     BrowserHandle,
     BrowserRequirements,
-    DaemonConfig,
     HookType,
     PluginStatus,
 )
@@ -80,7 +78,15 @@ def create_app(daemon: ObscuraDaemon) -> FastAPI:
     @app.get("/api/v1/cookies/{platform}")
     async def get_cookies(platform: str) -> dict[str, str] | None:
         """Get cookies for a platform from the cache."""
-        return await daemon.get_cookies(platform)
+        cookies = await daemon.get_cookies(platform)
+        if cookies is None:
+            return None
+        # Convert list of cookie dicts to name->value dict
+        if isinstance(cookies, list):
+            return {c["name"]: c["value"] for c in cookies if "name" in c and "value" in c}
+        if isinstance(cookies, dict):
+            cookies = {k: v for k, v in cookies.items() if isinstance(v, str)}
+        return cookies
 
     @app.post("/api/v1/sync/{platform}")
     async def sync_cookies(platform: str) -> dict:
