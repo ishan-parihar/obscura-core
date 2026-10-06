@@ -256,10 +256,14 @@ class ObscuraCookieManager:
     
     async def force_re_extraction(self) -> CookieValidationResult:
         """Force re-extraction from browser (e.g., after user logs in)."""
+        # Reset counters under the lock, then release before calling
+        # get_cookies (which acquires the same lock). asyncio.Lock is NOT
+        # reentrant — holding it across the call deadlocked every forced
+        # refresh.
         async with self._lock:
             self._re_extraction_attempts = 0
             self._last_re_extraction = 0
-            return await self.get_cookies(force_refresh=True)
+        return await self.get_cookies(force_refresh=True)
     
     async def invalidate_and_trigger_relogin(self) -> None:
         """Manually invalidate auth and trigger re-login."""
