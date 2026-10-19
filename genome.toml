@@ -1,7 +1,7 @@
 # genome.toml — modules on, role → path map, module settings. Edit freely.
 [genome]
 schema_version = 2
-modules = ["core", "agents"]
+modules = ["core", "agents", "records"]
 
 [paths]
 agents = "AGENTS.md"
@@ -36,3 +36,4 @@ warn_until = "2026-11-18"  # warn until rollout+30d; after it a stale manual blo
 
 [card]
 status_into = "docs/handoff/STATE.md"
+architecture = "README.md"
